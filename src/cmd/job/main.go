@@ -1,24 +1,32 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/hellomyzn/yt-notifier/src/internal/config"
-	"github.com/hellomyzn/yt-notifier/src/internal/controller"
-	"github.com/hellomyzn/yt-notifier/src/internal/repository"
-	"github.com/hellomyzn/yt-notifier/src/internal/service"
+	"github.com/hellomyzn/yt-notifier/config"
+	"github.com/hellomyzn/yt-notifier/internal/controller"
+	"github.com/hellomyzn/yt-notifier/internal/repository"
+	"github.com/hellomyzn/yt-notifier/internal/service"
 )
 
 func main() {
-	cfg, err := config.Load("config/app.yaml")
+	root, err := repoRoot()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	chRepo := &repository.CSVChannelRepository{Path: filepath.Clean("src/src/csv/channels.csv")}
-	notiRepo := &repository.CSVNotifiedRepository{Path: filepath.Clean("src/src/csv/notified.csv")}
+	cfg, err := config.Load(filepath.Join(root, "config", "app.yaml"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	csvDir := filepath.Join(root, "src", "csv")
+	chRepo := &repository.CSVChannelRepository{Path: filepath.Join(csvDir, "channels.csv")}
+	notiRepo := &repository.CSVNotifiedRepository{Path: filepath.Join(csvDir, "notified.csv")}
 	feedRepo := &repository.RSSFeedRepository{}
 
 	feedSvc := service.NewFeedService(
@@ -42,4 +50,26 @@ func main() {
 	if err := job.RunOnce(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func repoRoot() (string, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	for {
+		candidate := filepath.Join(wd, "go.mod")
+		if _, err := os.Stat(candidate); err == nil {
+			return wd, nil
+		}
+
+		parent := filepath.Dir(wd)
+		if parent == wd {
+			break
+		}
+		wd = parent
+	}
+
+	return "", fmt.Errorf("go.mod not found from %s", wd)
 }

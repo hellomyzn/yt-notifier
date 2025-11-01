@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hellomyzn/yt-notifier/src/internal/model"
+	"github.com/hellomyzn/yt-notifier/internal/model"
 )
 
 type ChannelRepository interface {

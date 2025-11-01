@@ -12,7 +12,7 @@
 - 外部I/O（RSS, Webhook）や境界で使う構造体を model に DTO として定義。
 
 4. 設定管理
-- config/app.yaml にカテゴリ→出力先のマッピング、レート、フィルタ等を定義。
+- src/config/app.yaml にカテゴリ→出力先のマッピング、レート、フィルタ等を定義。
 - Webhook の実値は 環境変数（Secrets）でのみ注入。リポジトリ内に秘匿情報を置かない。
 
 5. CSV 運用

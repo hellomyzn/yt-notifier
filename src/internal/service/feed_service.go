@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/hellomyzn/yt-notifier/src/internal/model"
-	"github.com/hellomyzn/yt-notifier/src/internal/repository"
+	"github.com/hellomyzn/yt-notifier/internal/model"
+	"github.com/hellomyzn/yt-notifier/internal/repository"
 )
 
 type FeedService interface {
