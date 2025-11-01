@@ -1,10 +1,6 @@
 # シーケンス — RunOnce 全体フロー
 
 ```mermaid
-hoge[hoge]
-```
-
-```mermaid
 sequenceDiagram
 autonumber
 participant GH as GitHub Actions (Runner)
