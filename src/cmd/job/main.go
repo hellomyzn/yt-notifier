@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/hellomyzn/yt-notifier/src/internal/config"
-	"github.com/hellomyzn/yt-notifier/src/internal/controller"
-	"github.com/hellomyzn/yt-notifier/src/internal/repository"
-	"github.com/hellomyzn/yt-notifier/src/internal/service"
+	"github.com/hellomyzn/yt-notifier/config"
+	"github.com/hellomyzn/yt-notifier/internal/controller"
+	"github.com/hellomyzn/yt-notifier/internal/repository"
+	"github.com/hellomyzn/yt-notifier/internal/service"
 )
 
 func main() {

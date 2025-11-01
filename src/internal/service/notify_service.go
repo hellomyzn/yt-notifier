@@ -5,9 +5,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/hellomyzn/yt-notifier/src/internal/model"
-	"github.com/hellomyzn/yt-notifier/src/internal/notifier"
-	"github.com/hellomyzn/yt-notifier/src/internal/repository"
+	"github.com/hellomyzn/yt-notifier/internal/model"
+	"github.com/hellomyzn/yt-notifier/internal/notifier"
+	"github.com/hellomyzn/yt-notifier/internal/repository"
 )
 
 type NotifyService interface {

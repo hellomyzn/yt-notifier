@@ -3,8 +3,8 @@ package controller
 import (
 	"time"
 
-	"github.com/hellomyzn/yt-notifier/src/internal/repository"
-	"github.com/hellomyzn/yt-notifier/src/internal/service"
+	"github.com/hellomyzn/yt-notifier/internal/repository"
+	"github.com/hellomyzn/yt-notifier/internal/service"
 )
 
 type JobController interface {
