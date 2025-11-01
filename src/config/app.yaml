@@ -3,7 +3,7 @@ category_to_output:
   travel: "discord"
   news:   "discord"
 category_to_env:
-  travel: "DISCORD_WEBHOOK_TRAVEL"  # 実値は環境変数/Secretsで注入
+  travel: "https://discord.com/api/webhooks/1434205204831535185/X-x7ZYVHfSi1Ux8XTNFdmegc-JNtT6w3lY4-kAxDls_EEJIH1py4f8NnXgQu2Or3_3kk"  # 実値は環境変数/Secretsで注入
   news:   "DISCORD_WEBHOOK_NEWS"
 rate_limit:
   fetch_sleep_ms: 1200

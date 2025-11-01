@@ -17,8 +17,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	chRepo := &repository.CSVChannelRepository{Path: filepath.Clean("src/src/csv/channels.csv")}
-	notiRepo := &repository.CSVNotifiedRepository{Path: filepath.Clean("src/src/csv/notified.csv")}
+	chRepo := &repository.CSVChannelRepository{Path: filepath.Clean("src/csv/channels.csv")}
+	notiRepo := &repository.CSVNotifiedRepository{Path: filepath.Clean("src/csv/notified.csv")}
 	feedRepo := &repository.RSSFeedRepository{}
 
 	feedSvc := service.NewFeedService(
