@@ -1,0 +1,15 @@
+default_output: "discord"  # 今回はDiscordのみ
+category_to_output:
+  travel: "discord"
+  news:   "discord"
+category_to_env:
+  travel: "DISCORD_WEBHOOK_TRAVEL"  # 実値は環境変数/Secretsで注入
+  news:   "DISCORD_WEBHOOK_NEWS"
+rate_limit:
+  fetch_sleep_ms: 1200
+  post_sleep_ms: 900
+filters:
+  include_premieres: false
+  include_live: false
+  include_shorts: true
+timezone: "Asia/Tokyo"

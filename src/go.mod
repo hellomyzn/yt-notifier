@@ -1,3 +1,3 @@
-module example.com/docker-go
+module github.com/hellomyzn/yt-notifier
 
-go 1.24.0
+go 1.24.6
