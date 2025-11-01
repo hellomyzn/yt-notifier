@@ -21,15 +21,17 @@ type Notifier interface {
 type DiscordNotifier struct{ Webhook string }
 
 func (n *DiscordNotifier) Send(c NotificationContent) error {
+	embed := map[string]any{
+		"title":       c.Title,
+		"description": c.Message,
+		"url":         c.URL,
+	}
+	if c.ThumbURL != "" {
+		embed["image"] = map[string]string{"url": c.ThumbURL}
+	}
+
 	payload := map[string]any{
-		"embeds": []map[string]any{
-			{
-				"title":       c.Title,
-				"description": c.Message,
-				"url":         c.URL,
-				"thumbnail":   map[string]string{"url": c.ThumbURL},
-			},
-		},
+		"embeds": []map[string]any{embed},
 	}
 	b, _ := json.Marshal(payload)
 	resp, err := http.Post(n.Webhook, "application/json", bytes.NewReader(b))

@@ -85,6 +85,9 @@ func splitKeyValue(line string) (string, string, bool) {
 	if c := strings.Index(value, "#"); c != -1 {
 		value = strings.TrimSpace(value[:c])
 	}
+	if value == "" {
+		return key, "", false
+	}
 	return key, trimQuotes(value), true
 }
 
