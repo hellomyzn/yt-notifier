@@ -72,15 +72,92 @@ func normalizeVideoID(guid, link string) string {
 }
 
 type ytFeed struct {
-	Title   string
-	Entries []ytEntry
+	XMLName xml.Name  `xml:"feed"`
+	Title   string    `xml:"title"`
+	Entries []ytEntry `xml:"entry"`
 }
 
 type ytEntry struct {
 	ID        string
+	AltID     string
 	Title     string
 	Links     []ytLink
 	Published string
+}
+
+func (e *ytEntry) UnmarshalXML(dec *xml.Decoder, start xml.StartElement) error {
+	const (
+		atomNS = "http://www.w3.org/2005/Atom"
+		ytNS   = "http://www.youtube.com/xml/schemas/2015"
+	)
+
+	*e = ytEntry{}
+	for {
+		tok, err := dec.Token()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return err
+		}
+		switch t := tok.(type) {
+		case xml.StartElement:
+			switch {
+			case (t.Name.Space == atomNS || t.Name.Space == "") && t.Name.Local == "id":
+				var id string
+				if err := dec.DecodeElement(&id, &t); err != nil {
+					return err
+				}
+				e.AltID = id
+				if e.ID == "" {
+					e.ID = id
+				}
+			case (t.Name.Space == atomNS || t.Name.Space == "") && t.Name.Local == "title":
+				var title string
+				if err := dec.DecodeElement(&title, &t); err != nil {
+					return err
+				}
+				e.Title = title
+			case (t.Name.Space == atomNS || t.Name.Space == "") && t.Name.Local == "published":
+				var published string
+				if err := dec.DecodeElement(&published, &t); err != nil {
+					return err
+				}
+				e.Published = published
+			case (t.Name.Space == atomNS || t.Name.Space == "") && t.Name.Local == "link":
+				link := ytLink{}
+				for _, attr := range t.Attr {
+					switch attr.Name.Local {
+					case "rel":
+						link.Rel = attr.Value
+					case "href":
+						link.Href = attr.Value
+					}
+				}
+				e.Links = append(e.Links, link)
+				if err := dec.Skip(); err != nil {
+					return err
+				}
+			case t.Name.Space == ytNS && t.Name.Local == "videoId":
+				var videoID string
+				if err := dec.DecodeElement(&videoID, &t); err != nil {
+					return err
+				}
+				if videoID != "" {
+					e.ID = videoID
+				}
+			default:
+				if err := dec.Skip(); err != nil {
+					return err
+				}
+			}
+		case xml.EndElement:
+			if t.Name == start.Name {
+				return nil
+			}
+		}
+	}
+	return nil
 }
 
 func (e ytEntry) Link() string {
@@ -96,125 +173,16 @@ func (e ytEntry) Link() string {
 }
 
 type ytLink struct {
-	Rel  string
-	Href string
+	Rel  string `xml:"rel,attr"`
+	Href string `xml:"href,attr"`
 }
 
 func decodeFeed(r io.Reader) (*ytFeed, error) {
 	dec := xml.NewDecoder(r)
-	const (
-		atomNS = "http://www.w3.org/2005/Atom"
-		ytNS   = "http://www.youtube.com/xml/schemas/2015"
-	)
-
-	feed := &ytFeed{}
-	var current *ytEntry
-	for {
-		tok, err := dec.Token()
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return nil, err
-		}
-		switch t := tok.(type) {
-		case xml.StartElement:
-			switch t.Name.Space {
-			case atomNS, "":
-				switch t.Name.Local {
-				case "title":
-					var text string
-					if err := dec.DecodeElement(&text, &t); err != nil {
-						return nil, err
-					}
-					if current == nil {
-						feed.Title = text
-					} else {
-						current.Title = text
-					}
-				case "entry":
-					feed.Entries = append(feed.Entries, ytEntry{})
-					current = &feed.Entries[len(feed.Entries)-1]
-				case "id":
-					if current == nil {
-						if err := dec.Skip(); err != nil {
-							return nil, err
-						}
-					} else {
-						var id string
-						if err := dec.DecodeElement(&id, &t); err != nil {
-							return nil, err
-						}
-						if current.ID == "" {
-							current.ID = id
-						}
-					}
-				case "published":
-					if current == nil {
-						if err := dec.Skip(); err != nil {
-							return nil, err
-						}
-					} else {
-						var published string
-						if err := dec.DecodeElement(&published, &t); err != nil {
-							return nil, err
-						}
-						current.Published = published
-					}
-				case "link":
-					if current == nil {
-						if err := dec.Skip(); err != nil {
-							return nil, err
-						}
-					} else {
-						link := ytLink{}
-						for _, attr := range t.Attr {
-							switch attr.Name.Local {
-							case "rel":
-								link.Rel = attr.Value
-							case "href":
-								link.Href = attr.Value
-							}
-						}
-						current.Links = append(current.Links, link)
-						if err := dec.Skip(); err != nil {
-							return nil, err
-						}
-					}
-				default:
-					if err := dec.Skip(); err != nil {
-						return nil, err
-					}
-				}
-			case ytNS:
-				if current == nil {
-					if err := dec.Skip(); err != nil {
-						return nil, err
-					}
-					continue
-				}
-				switch t.Name.Local {
-				case "videoId":
-					var videoID string
-					if err := dec.DecodeElement(&videoID, &t); err != nil {
-						return nil, err
-					}
-					current.ID = videoID
-				default:
-					if err := dec.Skip(); err != nil {
-						return nil, err
-					}
-				}
-			default:
-				if err := dec.Skip(); err != nil {
-					return nil, err
-				}
-			}
-		case xml.EndElement:
-			if t.Name.Space == atomNS && t.Name.Local == "entry" {
-				current = nil
-			}
-		}
+	dec.DefaultSpace = "http://www.w3.org/2005/Atom"
+	var feed ytFeed
+	if err := dec.Decode(&feed); err != nil {
+		return nil, err
 	}
-	return feed, nil
+	return &feed, nil
 }
