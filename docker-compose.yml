@@ -1,0 +1,84 @@
+version: '3.9'
+
+services:
+  go:
+    build:
+      context: .
+      dockerfile: ./infra/docker/go/Dockerfile
+    container_name: ${PROJECT_NAME:-docker-go}
+    hostname: ${PROJECT_NAME:-docker-go}
+    working_dir: /go/src/app
+    tty: true
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - target: 8080
+        published: ${APP_PORT:-8080}
+        protocol: tcp
+        mode: host
+    volumes:
+      - type: bind
+        source: ./src
+        target: /go/src/app
+    environment:
+      - TZ=${TZ-Asia/Tokyo}
+      - GO_ENV=${GO_ENV-development}
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # mysql:
+  #   image: mysql:8.0
+  #   container_name: ${PROJECT_NAME:-docker-go}-mysql
+  #   hostname: ${PROJECT_NAME:-docker-go}-mysql
+  #   restart: unless-stopped
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
+  #     MYSQL_DATABASE: ${MYSQL_DATABASE:-app}
+  #     MYSQL_USER: ${MYSQL_USER:-app}
+  #     MYSQL_PASSWORD: ${MYSQL_PASSWORD:-apppass}
+  #     TZ: ${TZ-Asia/Tokyo}
+  #   ports:
+  #     - target: 3306
+  #       published: ${MYSQL_PORT:-3306}
+  #       protocol: tcp
+  #       mode: host
+  #   volumes:
+  #     - type: volume
+  #       source: mysql-data
+  #       target: /var/lib/mysql
+  #   healthcheck:
+  #     test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  # postgres:
+  #   image: postgres:16
+  #   container_name: ${PROJECT_NAME:-docker-go}-postgres
+  #   hostname: ${PROJECT_NAME:-docker-go}-postgres
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: ${POSTGRES_USER:-app}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-apppass}
+  #     POSTGRES_DB: ${POSTGRES_DB:-app}
+  #     TZ: ${TZ-Asia/Tokyo}
+  #   ports:
+  #     - target: 5432
+  #       published: ${POSTGRES_PORT:-5432}
+  #       protocol: tcp
+  #       mode: host
+  #   volumes:
+  #     - type: volume
+  #       source: postgres-data
+  #       target: /var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+# volumes:
+#   # mysql-data:
+#   # postgres-data:

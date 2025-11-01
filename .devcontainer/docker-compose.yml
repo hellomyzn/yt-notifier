@@ -1,0 +1,101 @@
+services:
+  workspace:
+    container_name: ${PROJECT_NAME:-docker-go}-vscode
+    hostname: ${PROJECT_NAME:-docker-go}
+    build:
+      context: ..
+      dockerfile: .devcontainer/infra/docker/go/Dockerfile
+      args:
+        USER_NAME: ${USER_NAME-myzn}
+        GROUP_NAME: ${GROUP_NAME-myzn}
+        UID: ${UID-1000}
+        GID: ${GID-1000}
+        WORKDIR: ${WORKDIR-/home/myzn/workspace}
+        TZ: ${TZ-Asia/Tokyo}
+    working_dir: ${WORKDIR-/home/myzn/workspace}
+    tty: true
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - type: bind
+        source: ..
+        target: ${WORKDIR-/home/myzn/workspace}
+    ports:
+      - target: 8080
+        published: ${APP_PORT:-8080}
+        protocol: tcp
+        mode: host
+    environment:
+      - TZ=${TZ-Asia/Tokyo}
+    # depends_on:
+    #   # mysql:
+    #   #   condition: service_healthy
+    #   # postgres:
+    #   #   condition: service_healthy
+
+  plantuml:
+    build:
+      context: ..
+      dockerfile: .devcontainer/infra/docker/plantuml/Dockerfile
+    container_name: 'plantuml'
+    hostname: 'plantuml'
+    ports:
+      - target: 8080
+        published: ${PANTUML_PUBLISHED_PORT:-8081}
+
+# mysql:
+#   image: mysql:8.0
+#   container_name: ${PROJECT_NAME:-docker-go}-vscode-mysql
+#   hostname: ${PROJECT_NAME:-docker-go}-mysql
+#   restart: unless-stopped
+#   environment:
+#     MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
+#     MYSQL_DATABASE: ${MYSQL_DATABASE:-app}
+#     MYSQL_USER: ${MYSQL_USER:-app}
+#     MYSQL_PASSWORD: ${MYSQL_PASSWORD:-apppass}
+#     TZ: ${TZ-Asia/Tokyo}
+#   ports:
+#     - target: 3306
+#       published: ${MYSQL_PORT:-3306}
+#       protocol: tcp
+#       mode: host
+#   volumes:
+#     - type: volume
+#       source: mysql-data
+#       target: /var/lib/mysql
+#   healthcheck:
+#     test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+#     interval: 10s
+#     timeout: 5s
+#     retries: 5
+
+
+  # postgres:
+  #   image: postgres:16
+  #   container_name: ${PROJECT_NAME:-docker-go}-vscode-postgres
+  #   hostname: ${PROJECT_NAME:-docker-go}-postgres
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: ${POSTGRES_USER:-app}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-apppass}
+  #     POSTGRES_DB: ${POSTGRES_DB:-app}
+  #     TZ: ${TZ-Asia/Tokyo}
+  #   ports:
+  #     - target: 5432
+  #       published: ${POSTGRES_PORT:-5432}
+  #       protocol: tcp
+  #       mode: host
+  #   volumes:
+  #     - type: volume
+  #       source: postgres-data
+  #       target: /var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+# volumes:
+#   # mysql-data:
+#   # postgres-data:

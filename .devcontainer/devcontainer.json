@@ -1,0 +1,33 @@
+{
+  "name": "yt-notifier",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "workspace",
+  "workspaceFolder": "/home/myzn/workspace",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // Basic
+        "WakaTime.vscode-wakatime",
+        "oderwat.indent-rainbow",
+        "streetsidesoftware.code-spell-checker",
+        "vscodevim.vim",
+        "esbenp.prettier-vscode",
+        "Gruntfuggly.todo-tree",
+        "eamodio.gitlens",
+        "mikestead.dotenv",
+        "GitHub.vscode-github-actions",
+
+        // editor
+        "vscodevim.vim",
+        "yzhang.markdown-all-in-one",
+        "shd101wyy.markdown-preview-enhanced",
+        "jebbs.plantuml",
+
+        // go
+        "golang.go",
+        "ms-azuretools.vscode-docker",
+        "streetsidesoftware.code-spell-checker"
+      ]
+    }
+  }
+}

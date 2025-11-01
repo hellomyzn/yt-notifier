@@ -1,0 +1,26 @@
+{
+  "editor.minimap.enabled": false,
+  "breadcrumbs.enabled": true,
+  "files.insertFinalNewline": true,
+  "editor.renderLineHighlight": "all",
+  "cSpell.ignoreWords": [
+    "hoge",
+    "myzn",
+    "psql"
+  ],
+  "cSpell.words": [],
+  "editor.tabSize": 4,
+  "files.autoSave": "off",
+  "editor.tabFocusMode": false,
+  "go.formatTool": "gofmt",
+  "[go]": {
+    "editor.defaultFormatter": "golang.go",
+    "editor.formatOnSave": true
+  },
+  // markdown
+  "[markdown]": {
+      "editor.defaultFormatter": "yzhang.markdown-all-in-one"
+  },
+  "plantuml.render": "PlantUMLServer",
+  "plantuml.server": "http://plantuml:8080",
+}
