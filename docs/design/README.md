@@ -24,7 +24,7 @@ YouTube RSS を巡回し、新着動画をカテゴリごとに Discord / Slack 
 ## 3. システム構成
 - 実行基盤：GitHub Actions（cron: 6h）
 - アプリ：Go 1.24+ 単一バイナリ
-- 設定：`config/app.yaml`
+- 設定：`src/config/app.yaml`
 - データ：`src/src/csv/`（Git未管理）
 
 

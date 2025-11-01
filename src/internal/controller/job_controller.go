@@ -1,10 +1,11 @@
 package controller
 
 import (
+	"log"
 	"time"
 
-	"github.com/hellomyzn/yt-notifier/src/internal/repository"
-	"github.com/hellomyzn/yt-notifier/src/internal/service"
+	"github.com/hellomyzn/yt-notifier/internal/repository"
+	"github.com/hellomyzn/yt-notifier/internal/service"
 )
 
 type JobController interface {
@@ -29,9 +30,14 @@ func (c *jobController) RunOnce() error {
 	}
 	for _, ch := range channels {
 		videos, err := c.feedSvc.ListNewVideos(ch)
-		if err == nil {
-			for _, v := range videos {
-				_ = c.notifySvc.Notify(ch.Category, v)
+		if err != nil {
+			log.Printf("failed to list new videos for channel=%s: %v", ch.ChannelID, err)
+			time.Sleep(c.fetchSleep)
+			continue
+		}
+		for _, v := range videos {
+			if err := c.notifySvc.Notify(ch.Category, v); err != nil {
+				log.Printf("failed to notify channel=%s video=%s: %v", ch.ChannelID, v.VideoID, err)
 			}
 		}
 		time.Sleep(c.fetchSleep)

@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hellomyzn/yt-notifier/src/internal/model"
+	"github.com/hellomyzn/yt-notifier/internal/model"
 )
 
 type ChannelRepository interface {
@@ -42,7 +42,7 @@ func (r *CSVChannelRepository) ListEnabled() ([]model.ChannelDTO, error) {
 		}
 		out = append(out, model.ChannelDTO{
 			ChannelID: strings.TrimSpace(row[0]),
-			Category:  strings.TrimSpace(row[1]),
+			Category:  strings.ToLower(strings.TrimSpace(row[1])),
 			Name:      strings.TrimSpace(row[2]),
 			Enabled:   true,
 		})

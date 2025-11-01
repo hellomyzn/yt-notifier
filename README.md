@@ -9,7 +9,7 @@ YouTubeのRSSを巡回し、カテゴリごとに Discord / Slack へ新着動�
 - Controller / Service / Repository のクリーン構成
 
 ## ディレクトリ
-config/              # app.yaml（カテゴリ→出力先／ENV名、レート、フィルタ）
+src/config/          # app.yaml（カテゴリ→出力先／ENV名、レート、フィルタ）
 src/cmd/job/         # エントリポイント（RunOnceジョブ）
 src/internal/        # controller, service, repository, notifier, model, config, util
 src/src/csv/         # CSV置き場（Git未管理）
@@ -21,10 +21,11 @@ docs/                # 設計ドキュメント
 
 ## セットアップ（ローカル）
 ```bash
+cd src
 go mod tidy
-mkdir -p src/src/csv
+mkdir -p src/csv
 # channels.csv / notified.csv を配置（Gitに含めない）
-go run ./src/cmd/job
+go run ./cmd/job
 ```
 
 ## GitHub Actions（6時間ごと）

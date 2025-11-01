@@ -3,11 +3,12 @@ package service
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
-	"github.com/hellomyzn/yt-notifier/src/internal/model"
-	"github.com/hellomyzn/yt-notifier/src/internal/notifier"
-	"github.com/hellomyzn/yt-notifier/src/internal/repository"
+	"github.com/hellomyzn/yt-notifier/internal/model"
+	"github.com/hellomyzn/yt-notifier/internal/notifier"
+	"github.com/hellomyzn/yt-notifier/internal/repository"
 )
 
 type NotifyService interface {
@@ -29,7 +30,7 @@ func NewNotifyService(notified repository.NotifiedRepository, categoryToEnv map[
 }
 
 func (s *notifyService) Notify(category string, v model.VideoDTO) error {
-	envName, ok := s.categoryToEnv[category]
+	envName, ok := s.categoryToEnv[strings.ToLower(category)]
 	if !ok || envName == "" {
 		return fmt.Errorf("webhook env not mapped for category=%s", category)
 	}
