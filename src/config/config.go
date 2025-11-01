@@ -103,9 +103,9 @@ func applyTopLevel(cfg *AppConfig, key, value string) error {
 func applySection(cfg *AppConfig, section, key, value string) error {
 	switch section {
 	case "category_to_output":
-		cfg.CategoryToOutput[key] = value
+		cfg.CategoryToOutput[strings.ToLower(key)] = value
 	case "category_to_env":
-		cfg.CategoryToEnv[key] = value
+		cfg.CategoryToEnv[strings.ToLower(key)] = value
 	case "rate_limit":
 		iv, err := strconv.Atoi(value)
 		if err != nil {
