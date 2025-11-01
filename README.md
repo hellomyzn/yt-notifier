@@ -1,57 +1,44 @@
-# docker-go
+# yt-notifier
 
-Docker で Go アプリケーションを開発・実行するためのスタータープロジェクトです。
+YouTubeのRSSを巡回し、カテゴリごとに Discord / Slack へ新着動画を通知するジョブ（Go 1.24+）。
 
-- [setup](#setup)
-- [docker commands](#docker-commands)
-- [start](#start)
-- [containers](#containers)
-- [project-structure](#project-structure)
+## 特長
+- 100〜数百チャンネル対応 / 6時間ごと実行（GitHub Actions）
+- DB不使用、CSVで軽量運用（Git未管理）
+- カテゴリ別に Discord/Slack を切替可能
+- Controller / Service / Repository のクリーン構成
 
-### setup
+## ディレクトリ
+config/              # app.yaml（カテゴリ→出力先／ENV名、レート、フィルタ）
+src/cmd/job/         # エントリポイント（RunOnceジョブ）
+src/internal/        # controller, service, repository, notifier, model, config, util
+src/src/csv/         # CSV置き場（Git未管理）
+docs/                # 設計ドキュメント
+
+## 前提
+- Go 1.24+
+- Webhook（Discord/Slack）のURLは GitHub Secrets 経由で注入
+
+## セットアップ（ローカル）
 ```bash
-cp .env.template .env
-```
-必要に応じてポート番号などを調整してください。
-
-### docker commands
-```bash
-# build & up container
-docker compose up -d --build
-$ make up
-# destroy
-docker compose down --rmi all --volumes --remove-orphans
-$ make destroy
-# attach to go container (docker compose exec go bash)
-$ make go
-# down container
-docker compose down
-$ make down
+go mod tidy
+mkdir -p src/src/csv
+# channels.csv / notified.csv を配置（Gitに含めない）
+go run ./src/cmd/job
 ```
 
-### start
-1. run container
-```bash
-$ make up
-```
-2. check http server (default port: 8080)
-```bash
-$ curl http://localhost:8080
-$ curl http://localhost:8080/healthz
+## GitHub Actions（6時間ごと）
+
+- ワークフロー：.github/workflows/youtube-notify.yml
+- Secrets 例：DISCORD_WEBHOOK_TRAVEL, SLACK_WEBHOOK_NEWS, DISCORD_WEBHOOK_TECH
+
+## CSV スキーマ
+```channels.csv
+channel_id,category,name,enabled
+UCxxxxxx1,travel,Backpacking Asia,true
+UCyyyyyy2,news,World News Digest,true
 ```
 
-### containers
-- go
-  - Go アプリケーション実行用のコンテナ
-
-### project-structure
-```
-/project_root
-├── infra/docker/go/      # Go 用 Dockerfile
-├── src/                  # Go アプリケーションのソースコード
-│   ├── cmd/server/main.go
-│   └── go.mod
-├── docker-compose.yml
-├── Makefile
-└── README.md (this file)
+```notified.csv
+video_id,channel_id,published_at,notified_at
 ```

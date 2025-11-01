@@ -1,2 +1,15 @@
 *.env
 src/server
+
+# CSV（Git未管理）
+/src/src/csv/
+/src/src/csv/*.csv
+
+
+# OS / Editor
+.DS_Store
+.idea/
+
+
+# Go
+bin/
