@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -16,27 +15,26 @@ type NotifyService interface {
 }
 
 type notifyService struct {
-	notifiedRepo  repository.NotifiedRepository
-	categoryToEnv map[string]string
-	postSleep     time.Duration
+	notifiedRepo      repository.NotifiedRepository
+	categoryToWebhook map[string]string
+	postSleep         time.Duration
 }
 
-func NewNotifyService(notified repository.NotifiedRepository, categoryToEnv map[string]string, postSleep time.Duration) NotifyService {
+func NewNotifyService(notified repository.NotifiedRepository, categoryToWebhook map[string]string, postSleep time.Duration) NotifyService {
 	return &notifyService{
-		notifiedRepo:  notified,
-		categoryToEnv: categoryToEnv,
-		postSleep:     postSleep,
+		notifiedRepo:      notified,
+		categoryToWebhook: categoryToWebhook,
+		postSleep:         postSleep,
 	}
 }
 
 func (s *notifyService) Notify(category string, v model.VideoDTO) error {
-	envName, ok := s.categoryToEnv[strings.ToLower(category)]
-	if !ok || envName == "" {
-		return fmt.Errorf("webhook env not mapped for category=%s", category)
-	}
-	webhook := os.Getenv(envName)
+	webhook, ok := s.categoryToWebhook[strings.ToLower(category)]
 	if webhook == "" {
-		return fmt.Errorf("webhook env is empty: %s", envName)
+		if ok {
+			return fmt.Errorf("webhook is empty for category=%s", category)
+		}
+		return fmt.Errorf("webhook not mapped for category=%s", category)
 	}
 
 	cli := &notifier.DiscordNotifier{Webhook: webhook}

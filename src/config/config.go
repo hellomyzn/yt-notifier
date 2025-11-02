@@ -12,6 +12,7 @@ type AppConfig struct {
 	DefaultOutput    string
 	CategoryToOutput map[string]string
 	CategoryToEnv    map[string]string
+	WebhookFile      string
 	RateLimit        struct {
 		FetchSleepMS int
 		PostSleepMS  int
@@ -97,6 +98,8 @@ func applyTopLevel(cfg *AppConfig, key, value string) error {
 		cfg.DefaultOutput = value
 	case "timezone":
 		cfg.Timezone = value
+	case "webhook_file":
+		cfg.WebhookFile = value
 	default:
 		return nil
 	}

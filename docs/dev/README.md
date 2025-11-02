@@ -13,7 +13,7 @@
 
 4. 設定管理
 - src/config/app.yaml にカテゴリ→出力先のマッピング、レート、フィルタ等を定義。
-- Webhook の実値は 環境変数（Secrets）でのみ注入。リポジトリ内に秘匿情報を置かない。
+- Webhook の実値は Git未管理の src/config/webhooks.env に記載。リポジトリ内に秘匿情報をコミットしない。
 
 5. CSV 運用
 - src/src/csv/ 配下の CSV は Git管理対象外。.gitignore にパスを含める。
