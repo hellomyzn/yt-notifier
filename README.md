@@ -9,7 +9,7 @@ YouTubeのRSSを巡回し、カテゴリごとに Discord / Slack へ新着動�
 - Controller / Service / Repository のクリーン構成
 
 ## ディレクトリ
-src/config/          # app.yaml（カテゴリ→出力先／ENV名、レート、フィルタ）, webhooks.env（Webhook実体、Git未管理）
+src/config/          # app.yaml（カテゴリ→出力先／ENV名、レート、フィルタ）, webhooks.env（Webhook実体、Git未管理）, youtube.env（APIキー、Git未管理）
 src/cmd/job/         # エントリポイント（RunOnceジョブ）
 src/internal/        # controller, service, repository, notifier, model, config, util
 src/src/csv/         # CSV置き場（Git未管理）
@@ -18,6 +18,7 @@ docs/                # 設計ドキュメント
 ## 前提
 - Go 1.24+
 - Webhook（Discord/Slack）のURLは src/config/webhooks.env に記載（Git未管理）
+- YouTube Data API キーは src/config/youtube.env に記載（Git未管理）
 
 ## セットアップ（ローカル）
 ```bash
@@ -26,6 +27,8 @@ go mod tidy
 mkdir -p src/csv
 # Webhook設定ファイルを作成
 cp config/webhooks.env.example config/webhooks.env
+# YouTube API キー設定ファイルを作成
+cp config/youtube.env.example config/youtube.env
 # channels.csv / notified.csv を配置（Gitに含めない）
 go run ./cmd/job
 ```
@@ -37,11 +40,16 @@ go run ./cmd/job
 
 ## CSV スキーマ
 ```channels.csv
-channel_id,category,name,enabled
-UCxxxxxx1,travel,Backpacking Asia,true
-UCyyyyyy2,news,World News Digest,true
+channel_id,category,name,enabled,fetch_limit
+UCxxxxxx1,travel,Backpacking Asia,true,10
+UCyyyyyy2,news,World News Digest,true,50
 ```
 
 ```notified.csv
 video_id,channel_id,published_at,notified_at
 ```
+
+## YouTube API の利用
+
+- src/config/youtube.env に `YOUTUBE_API_KEY` を設定すると、`channels.csv` の `fetch_limit` が 15 以上のチャンネルは YouTube Data API (playlistItems) から取得します。
+- `fetch_limit` が 14 以下、もしくは youtube.env が存在しない / API キーが未設定の場合は従来どおり RSS から取得します。

@@ -6,6 +6,9 @@ category_to_output:
 category_to_env:
   travel: "DISCORD_WEBHOOK_TRAVEL"  # 実値は webhooks.env で管理
   news:   "DISCORD_WEBHOOK_NEWS"
+youtube:
+  api_key_file: "config/youtube.env"
+  api_key_name: "YOUTUBE_API_KEY"
 rate_limit:
   fetch_sleep_ms: 1200
   post_sleep_ms: 900

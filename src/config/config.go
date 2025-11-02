@@ -13,7 +13,11 @@ type AppConfig struct {
 	CategoryToOutput map[string]string
 	CategoryToEnv    map[string]string
 	WebhookFile      string
-	RateLimit        struct {
+	YouTube          struct {
+		APIKeyFile string
+		APIKeyName string
+	}
+	RateLimit struct {
 		FetchSleepMS int
 		PostSleepMS  int
 	}
@@ -112,6 +116,13 @@ func applySection(cfg *AppConfig, section, key, value string) error {
 		cfg.CategoryToOutput[strings.ToLower(key)] = value
 	case "category_to_env":
 		cfg.CategoryToEnv[strings.ToLower(key)] = value
+	case "youtube":
+		switch key {
+		case "api_key_file":
+			cfg.YouTube.APIKeyFile = value
+		case "api_key_name":
+			cfg.YouTube.APIKeyName = value
+		}
 	case "rate_limit":
 		iv, err := strconv.Atoi(value)
 		if err != nil {
