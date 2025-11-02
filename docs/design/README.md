@@ -46,7 +46,7 @@ YouTube RSS を巡回し、新着動画をカテゴリごとに Discord / Slack 
 
 ## 5. 外部連携
 - YouTube RSS: `https://www.youtube.com/feeds/videos.xml?channel_id={id}`
-- YouTube Data API (playlistItems, uploads playlist) — `YOUTUBE_API_KEY`
+- YouTube Data API (playlistItems, uploads playlist) — `src/config/youtube.env` に保存
 - Discord Webhook（Embed） / Slack Webhook（Blocks/Mrkdwn）
 
 
@@ -62,7 +62,8 @@ YouTube RSS を巡回し、新着動画をカテゴリごとに Discord / Slack 
 
 ## 8. セキュリティ
 - Webhook は Git未管理の `src/config/webhooks.env` から取得
-- `config/app.yaml` は Webhook キー名のみ保持
+- YouTube API キーは Git未管理の `src/config/youtube.env` に保存
+- `config/app.yaml` は Webhook / YouTube API キー名のみ保持
 
 
 ## 9. ログ仕様

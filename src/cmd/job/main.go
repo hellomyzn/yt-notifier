@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -52,7 +53,29 @@ func main() {
 	chRepo := &repository.CSVChannelRepository{Path: filepath.Join(csvDir, "channels.csv")}
 	notiRepo := &repository.CSVNotifiedRepository{Path: filepath.Join(csvDir, "notified.csv")}
 	feedRepo := &repository.RSSFeedRepository{}
-	ytRepo := repository.NewYouTubeAPIRepository(os.Getenv("YOUTUBE_API_KEY"))
+
+	ytKey := ""
+	ytCfg := cfg.YouTube
+	if ytCfg.APIKeyFile != "" && ytCfg.APIKeyName != "" {
+		ytFile := ytCfg.APIKeyFile
+		if !filepath.IsAbs(ytFile) {
+			ytFile = filepath.Join(root, ytFile)
+		}
+		secrets, err := config.LoadEnvFile(ytFile)
+		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				log.Printf("youtube api key file %s not found; falling back to RSS", ytFile)
+			} else {
+				log.Fatalf("failed to load youtube api key file: %v", err)
+			}
+		} else {
+			ytKey = secrets[ytCfg.APIKeyName]
+			if ytKey == "" {
+				log.Printf("youtube api key %s not found in %s; falling back to RSS", ytCfg.APIKeyName, ytFile)
+			}
+		}
+	}
+	ytRepo := repository.NewYouTubeAPIRepository(ytKey)
 
 	feedSvc := service.NewFeedService(
 		feedRepo, ytRepo, notiRepo,
