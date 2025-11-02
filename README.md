@@ -37,11 +37,16 @@ go run ./cmd/job
 
 ## CSV スキーマ
 ```channels.csv
-channel_id,category,name,enabled
-UCxxxxxx1,travel,Backpacking Asia,true
-UCyyyyyy2,news,World News Digest,true
+channel_id,category,name,enabled,fetch_limit
+UCxxxxxx1,travel,Backpacking Asia,true,10
+UCyyyyyy2,news,World News Digest,true,50
 ```
 
 ```notified.csv
 video_id,channel_id,published_at,notified_at
 ```
+
+## YouTube API の利用
+
+- 環境変数 `YOUTUBE_API_KEY` に API キーを設定すると、`channels.csv` の `fetch_limit` が 15 以上のチャンネルは YouTube Data API (playlistItems) から取得します。
+- `fetch_limit` が 14 以下、もしくは API キーが設定されていない場合は従来どおり RSS から取得します。

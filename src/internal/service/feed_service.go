@@ -10,21 +10,30 @@ type FeedService interface {
 }
 
 type feedService struct {
-	feedRepo         repository.FeedRepository
+	rssRepo          repository.FeedRepository
+	ytRepo           repository.YouTubeRepository
 	notifiedRepo     repository.NotifiedRepository
 	includeLive      bool
 	includePremieres bool
 	includeShorts    bool
 }
 
-func NewFeedService(feed repository.FeedRepository, notified repository.NotifiedRepository,
+func NewFeedService(rss repository.FeedRepository, yt repository.YouTubeRepository, notified repository.NotifiedRepository,
 	includeLive, includePremieres, includeShorts bool) FeedService {
-	return &feedService{feedRepo: feed, notifiedRepo: notified,
+	return &feedService{rssRepo: rss, ytRepo: yt, notifiedRepo: notified,
 		includeLive: includeLive, includePremieres: includePremieres, includeShorts: includeShorts}
 }
 
 func (s *feedService) ListNewVideos(ch model.ChannelDTO) ([]model.VideoDTO, error) {
-	videos, err := s.feedRepo.Fetch(ch.ChannelID)
+	var (
+		videos []model.VideoDTO
+		err    error
+	)
+	if ch.FetchLimit >= 15 && s.ytRepo != nil {
+		videos, err = s.ytRepo.FetchUploads(ch.ChannelID, ch.FetchLimit)
+	} else {
+		videos, err = s.rssRepo.Fetch(ch.ChannelID)
+	}
 	if err != nil {
 		return nil, err
 	}

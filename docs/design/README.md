@@ -34,6 +34,7 @@ YouTube RSS を巡回し、新着動画をカテゴリごとに Discord / Slack 
 - `category` (string)
 - `name` (string, optional)
 - `enabled` (bool)
+- `fetch_limit` (int, optional) — 15 以上で YouTube Data API を利用
 
 
 ### notified.csv
@@ -45,6 +46,7 @@ YouTube RSS を巡回し、新着動画をカテゴリごとに Discord / Slack 
 
 ## 5. 外部連携
 - YouTube RSS: `https://www.youtube.com/feeds/videos.xml?channel_id={id}`
+- YouTube Data API (playlistItems, uploads playlist) — `YOUTUBE_API_KEY`
 - Discord Webhook（Embed） / Slack Webhook（Blocks/Mrkdwn）
 
 

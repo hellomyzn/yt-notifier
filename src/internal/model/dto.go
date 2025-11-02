@@ -3,10 +3,11 @@ package model
 import "time"
 
 type ChannelDTO struct {
-	ChannelID string
-	Category  string
-	Name      string
-	Enabled   bool
+	ChannelID  string
+	Category   string
+	Name       string
+	Enabled    bool
+	FetchLimit int
 }
 
 type VideoDTO struct {

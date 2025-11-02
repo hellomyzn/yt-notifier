@@ -3,6 +3,7 @@ package repository
 import (
 	"encoding/csv"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/hellomyzn/yt-notifier/internal/model"
@@ -40,11 +41,18 @@ func (r *CSVChannelRepository) ListEnabled() ([]model.ChannelDTO, error) {
 		if !enabled {
 			continue
 		}
+		var fetchLimit int
+		if len(row) >= 5 {
+			if v, err := strconv.Atoi(strings.TrimSpace(row[4])); err == nil {
+				fetchLimit = v
+			}
+		}
 		out = append(out, model.ChannelDTO{
-			ChannelID: strings.TrimSpace(row[0]),
-			Category:  strings.ToLower(strings.TrimSpace(row[1])),
-			Name:      strings.TrimSpace(row[2]),
-			Enabled:   true,
+			ChannelID:  strings.TrimSpace(row[0]),
+			Category:   strings.ToLower(strings.TrimSpace(row[1])),
+			Name:       strings.TrimSpace(row[2]),
+			Enabled:    true,
+			FetchLimit: fetchLimit,
 		})
 	}
 	return out, nil

@@ -52,9 +52,10 @@ func main() {
 	chRepo := &repository.CSVChannelRepository{Path: filepath.Join(csvDir, "channels.csv")}
 	notiRepo := &repository.CSVNotifiedRepository{Path: filepath.Join(csvDir, "notified.csv")}
 	feedRepo := &repository.RSSFeedRepository{}
+	ytRepo := repository.NewYouTubeAPIRepository(os.Getenv("YOUTUBE_API_KEY"))
 
 	feedSvc := service.NewFeedService(
-		feedRepo, notiRepo,
+		feedRepo, ytRepo, notiRepo,
 		cfg.Filters.IncludeLive, cfg.Filters.IncludePremieres, cfg.Filters.IncludeShorts,
 	)
 
