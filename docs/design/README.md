@@ -59,8 +59,8 @@ YouTube RSS を巡回し、新着動画をカテゴリごとに Discord / Slack 
 
 
 ## 8. セキュリティ
-- Webhook は GitHub Secrets の環境変数から取得
-- `config/app.yaml` は ENV 名のみ保持
+- Webhook は Git未管理の `src/config/webhooks.env` から取得
+- `config/app.yaml` は Webhook キー名のみ保持
 
 
 ## 9. ログ仕様

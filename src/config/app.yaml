@@ -1,9 +1,10 @@
 default_output: "discord"  # 今回はDiscordのみ
+webhook_file: "config/webhooks.env"
 category_to_output:
   travel: "discord"
   news:   "discord"
 category_to_env:
-  travel: "DISCORD_WEBHOOK_TRAVEL"  # 実値は環境変数/Secretsで注入
+  travel: "DISCORD_WEBHOOK_TRAVEL"  # 実値は webhooks.env で管理
   news:   "DISCORD_WEBHOOK_NEWS"
 rate_limit:
   fetch_sleep_ms: 1200

@@ -24,6 +24,30 @@ func main() {
 		log.Fatal(err)
 	}
 
+	webhookFile := cfg.WebhookFile
+	if webhookFile == "" {
+		webhookFile = filepath.Join("config", "webhooks.env")
+	}
+	if !filepath.IsAbs(webhookFile) {
+		webhookFile = filepath.Join(root, webhookFile)
+	}
+	webhookSecrets, err := config.LoadWebhookFile(webhookFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	categoryToWebhook := map[string]string{}
+	for category, envName := range cfg.CategoryToEnv {
+		if envName == "" {
+			continue
+		}
+		webhook, ok := webhookSecrets[envName]
+		if !ok || webhook == "" {
+			log.Fatalf("webhook secret not found for %s", envName)
+		}
+		categoryToWebhook[category] = webhook
+	}
+
 	csvDir := filepath.Join(root, "src", "csv")
 	chRepo := &repository.CSVChannelRepository{Path: filepath.Join(csvDir, "channels.csv")}
 	notiRepo := &repository.CSVNotifiedRepository{Path: filepath.Join(csvDir, "notified.csv")}
@@ -36,7 +60,7 @@ func main() {
 
 	notifySvc := service.NewNotifyService(
 		notiRepo,
-		cfg.CategoryToEnv,
+		categoryToWebhook,
 		time.Duration(cfg.RateLimit.PostSleepMS)*time.Millisecond,
 	)
 

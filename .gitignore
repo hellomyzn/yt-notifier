@@ -1,4 +1,5 @@
 *.env
+src/config/webhooks.env
 src/server
 
 # CSV（Git未管理）
