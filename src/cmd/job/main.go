@@ -98,6 +98,12 @@ func main() {
 	if err := job.RunOnce(); err != nil {
 		log.Fatal(err)
 	}
+
+	if ytRepo != nil {
+		if metrics := ytRepo.Metrics(); metrics.Requests > 0 || metrics.QuotaUnits > 0 {
+			log.Printf("youtube api usage: requests=%d quota_units=%d", metrics.Requests, metrics.QuotaUnits)
+		}
+	}
 }
 
 func repoRoot() (string, error) {

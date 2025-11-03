@@ -2,6 +2,7 @@ package repository
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hellomyzn/yt-notifier/internal/model"
@@ -19,15 +21,23 @@ type YouTubeRepository interface {
 }
 
 type YouTubeAPIRepository struct {
-	APIKey string
-	Client *http.Client
+	APIKey        string
+	Client        *http.Client
+	playlistCache map[string]string
+	cacheMu       sync.RWMutex
+	metrics       *YouTubeAPIMetrics
 }
 
 func NewYouTubeAPIRepository(apiKey string) *YouTubeAPIRepository {
 	if apiKey == "" {
 		return nil
 	}
-	return &YouTubeAPIRepository{APIKey: apiKey, Client: http.DefaultClient}
+	return &YouTubeAPIRepository{
+		APIKey:        apiKey,
+		Client:        http.DefaultClient,
+		playlistCache: map[string]string{},
+		metrics:       &YouTubeAPIMetrics{},
+	}
 }
 
 func (r *YouTubeAPIRepository) FetchUploads(channelID string, maxResults int) ([]model.VideoDTO, error) {
@@ -37,7 +47,7 @@ func (r *YouTubeAPIRepository) FetchUploads(channelID string, maxResults int) ([
 	if r.APIKey == "" {
 		return nil, fmt.Errorf("youtube api key is empty")
 	}
-	playlistID := uploadsPlaylistID(channelID)
+	playlistID := r.cachedPlaylistID(channelID)
 	if playlistID == "" {
 		return nil, fmt.Errorf("invalid channel id %s", channelID)
 	}
@@ -81,7 +91,17 @@ func (r *YouTubeAPIRepository) FetchUploads(channelID string, maxResults int) ([
 
 			if resp.StatusCode >= 300 {
 				snippet, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
-				err = fmt.Errorf("youtube api status %d: %s", resp.StatusCode, strings.TrimSpace(string(snippet)))
+				ytErr := &YouTubeAPIError{
+					StatusCode: resp.StatusCode,
+					Message:    strings.TrimSpace(string(snippet)),
+				}
+				if retryAfter := parseRetryAfter(resp.Header.Get("Retry-After")); retryAfter > 0 {
+					ytErr.RetryAfter = retryAfter
+				}
+				if resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode == http.StatusForbidden {
+					ytErr.Err = ErrYouTubeRateLimited
+				}
+				err = ytErr
 				return
 			}
 
@@ -123,6 +143,8 @@ func (r *YouTubeAPIRepository) FetchUploads(channelID string, maxResults int) ([
 			return nil, err
 		}
 
+		r.metrics.IncrementRequests()
+
 		if len(out) >= totalRequested {
 			break
 		}
@@ -140,6 +162,101 @@ func (r *YouTubeAPIRepository) FetchUploads(channelID string, maxResults int) ([
 	}
 
 	return out, nil
+}
+
+func (r *YouTubeAPIRepository) cachedPlaylistID(channelID string) string {
+	r.cacheMu.RLock()
+	cached := r.playlistCache[channelID]
+	r.cacheMu.RUnlock()
+	if cached != "" {
+		return cached
+	}
+	computed := uploadsPlaylistID(channelID)
+	if computed == "" {
+		return ""
+	}
+	r.cacheMu.Lock()
+	r.playlistCache[channelID] = computed
+	r.cacheMu.Unlock()
+	return computed
+}
+
+// Metrics returns a snapshot of the quota usage observed by the repository.
+func (r *YouTubeAPIRepository) Metrics() YouTubeAPIMetricsSnapshot {
+	if r == nil || r.metrics == nil {
+		return YouTubeAPIMetricsSnapshot{}
+	}
+	return r.metrics.Snapshot()
+}
+
+type YouTubeAPIMetrics struct {
+	mu             sync.Mutex
+	requestCount   int
+	quotaUnitCount int
+}
+
+func (m *YouTubeAPIMetrics) IncrementRequests() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.requestCount++
+	m.quotaUnitCount++ // playlistItems.list = 1 unit per call
+}
+
+func (m *YouTubeAPIMetrics) Snapshot() YouTubeAPIMetricsSnapshot {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return YouTubeAPIMetricsSnapshot{
+		Requests:   m.requestCount,
+		QuotaUnits: m.quotaUnitCount,
+	}
+}
+
+type YouTubeAPIMetricsSnapshot struct {
+	Requests   int
+	QuotaUnits int
+}
+
+var ErrYouTubeRateLimited = errors.New("youtube api rate limited")
+
+type YouTubeAPIError struct {
+	Err        error
+	StatusCode int
+	RetryAfter time.Duration
+	Message    string
+}
+
+func (e *YouTubeAPIError) Error() string {
+	if e == nil {
+		return ""
+	}
+	msg := fmt.Sprintf("youtube api status %d", e.StatusCode)
+	if e.Message != "" {
+		msg = fmt.Sprintf("%s: %s", msg, e.Message)
+	}
+	if e.RetryAfter > 0 {
+		msg = fmt.Sprintf("%s (retry after %s)", msg, e.RetryAfter)
+	}
+	return msg
+}
+
+func (e *YouTubeAPIError) Unwrap() error {
+	if e == nil {
+		return nil
+	}
+	return e.Err
+}
+
+func parseRetryAfter(value string) time.Duration {
+	if value == "" {
+		return 0
+	}
+	if secs, err := strconv.Atoi(value); err == nil {
+		return time.Duration(secs) * time.Second
+	}
+	if t, err := http.ParseTime(value); err == nil {
+		return time.Until(t)
+	}
+	return 0
 }
 
 type youtubePlaylistItemsResponse struct {
