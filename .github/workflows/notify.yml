@@ -1,0 +1,25 @@
+name: Notify subscribers
+
+on:
+  schedule:
+    - cron: '0 0,7,11 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: yt-notifier
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: src/go.mod
+      - name: Run notifier job
+        working-directory: src
+        env:
+          TZ: Asia/Tokyo
+        run: go run ./cmd/job

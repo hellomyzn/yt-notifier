@@ -42,5 +42,9 @@ func (c *jobController) RunOnce() error {
 		}
 		time.Sleep(c.fetchSleep)
 	}
+	feedStats := c.feedSvc.Stats()
+	notifyStats := c.notifySvc.Stats()
+	log.Printf("feed stats: rss=%d api=%d rss_fallbacks=%d api_fallbacks=%d saturation_triggers=%d", feedStats.RSSFetches, feedStats.APIFetches, feedStats.RSSFallbacks, feedStats.APIFallbacks, feedStats.SaturationTriggers)
+	log.Printf("notification stats: sent=%d retried_messages=%d retry_attempts=%d failed=%d", notifyStats.Sent, notifyStats.RetriedMessages, notifyStats.RetryAttempts, notifyStats.Failed)
 	return nil
 }
