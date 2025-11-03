@@ -51,12 +51,18 @@ func (n *DiscordNotifier) Send(c NotificationContent) error {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode >= 300 {
-		retryAfter := parseDiscordRetryAfter(resp.Header.Get("Retry-After"))
 		snippet, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
+		retryAfter := parseDiscordRetryAfter(resp.Header.Get("Retry-After"), snippet)
+		message := strings.TrimSpace(string(snippet))
+		if message == "" {
+			if derr := parseDiscordErrorMessage(snippet); derr != "" {
+				message = derr
+			}
+		}
 		return &DiscordHTTPError{
 			StatusCode: resp.StatusCode,
 			RetryAfter: retryAfter,
-			Message:    strings.TrimSpace(string(snippet)),
+			Message:    message,
 		}
 	}
 	return nil
@@ -82,15 +88,57 @@ func (e *DiscordHTTPError) Error() string {
 	return msg
 }
 
-func parseDiscordRetryAfter(raw string) time.Duration {
+func parseDiscordRetryAfter(raw string, body []byte) time.Duration {
+	if d := parseRetryAfterHeader(raw); d > 0 {
+		return d
+	}
+	if d := parseRetryAfterBody(body); d > 0 {
+		return d
+	}
+	return 0
+}
+
+func parseRetryAfterHeader(raw string) time.Duration {
 	if raw == "" {
 		return 0
 	}
-	if secs, err := strconv.Atoi(raw); err == nil {
-		return time.Duration(secs) * time.Second
+	if secs, err := strconv.ParseFloat(raw, 64); err == nil {
+		if secs <= 0 {
+			return 0
+		}
+		return time.Duration(secs * float64(time.Second))
 	}
 	if t, err := http.ParseTime(raw); err == nil {
 		return time.Until(t)
 	}
 	return 0
+}
+
+func parseRetryAfterBody(body []byte) time.Duration {
+	if len(body) == 0 {
+		return 0
+	}
+	var payload struct {
+		RetryAfter float64 `json:"retry_after"`
+	}
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return 0
+	}
+	if payload.RetryAfter <= 0 {
+		return 0
+	}
+	return time.Duration(payload.RetryAfter * float64(time.Second))
+}
+
+func parseDiscordErrorMessage(body []byte) string {
+	if len(body) == 0 {
+		return ""
+	}
+	var payload struct {
+		Message string `json:"message"`
+	}
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return ""
+	}
+	return strings.TrimSpace(payload.Message)
 }

@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"sync"
 	"time"
@@ -139,7 +140,8 @@ func (d *webhookDispatcher) send(content notifier.NotificationContent) (int, err
 	}
 	var lastErr error
 	retries := 0
-	for attempt := 0; attempt < d.maxRetries; attempt++ {
+	attempts := 0
+	for {
 		lastErr = d.notifier.Send(content)
 		if lastErr == nil {
 			d.nextAvailable = time.Now().Add(d.minInterval)
@@ -152,16 +154,26 @@ func (d *webhookDispatcher) send(content notifier.NotificationContent) (int, err
 			wait := httpErr.RetryAfter
 			if wait <= 0 {
 				wait = backoff
-			}
-			time.Sleep(wait)
-			if wait == backoff {
 				backoff = minDuration(backoff*2, 30*time.Second)
+			} else {
+				backoff = minDuration(wait*2, 30*time.Second)
 			}
-			continue
+			if wait > 0 {
+				d.nextAvailable = time.Now().Add(wait)
+				time.Sleep(wait)
+			}
+			if httpErr.StatusCode == http.StatusTooManyRequests {
+				continue
+			}
+		} else {
+			time.Sleep(backoff)
+			backoff = minDuration(backoff*2, 30*time.Second)
 		}
 
-		time.Sleep(backoff)
-		backoff = minDuration(backoff*2, 30*time.Second)
+		attempts++
+		if d.maxRetries > 0 && attempts >= d.maxRetries {
+			break
+		}
 	}
 	return retries, fmt.Errorf("failed to send discord notification after %d attempts: %w", d.maxRetries, lastErr)
 }
