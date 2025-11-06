@@ -10,6 +10,7 @@ category_to_env:
   camera_en: "DISCORD_WEBHOOK_CAMERA_EN"
   camera_jp: "DISCORD_WEBHOOK_CAMERA_JP"
   camera_official: "DISCORD_WEBHOOK_CAMERA_OFFICIAL"
+  education: "DISCORD_WEBHOOK_EDUCATION"
   english: "DISCORD_WEBHOOK_ENGLISH"
   entertainment_en: "DISCORD_WEBHOOK_ENTERTAINMENT_EN"
   entertainment_jp: "DISCORD_WEBHOOK_ENTERTAINMENT_JP"
