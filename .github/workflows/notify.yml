@@ -26,8 +26,8 @@ jobs:
           go-version-file: src/go.mod
       - name: Create .env files
         run: |
-          echo "${{ secrets.ENV_WEBHOOKS }}" > src/src/config/webhooks.env
-          echo "${{ secrets.ENV_YOUTUBE }}" > src/src/config/youtube.env
+          echo "${{ secrets.ENV_WEBHOOKS }}" > src/config/webhooks.env
+          echo "${{ secrets.ENV_YOUTUBE }}" > src/config/youtube.env
       - name: Sync CSV from footprints repository
         run: |
           pwd
