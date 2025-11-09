@@ -30,9 +30,11 @@ jobs:
           echo "${{ secrets.ENV_YOUTUBE }}" > src/config/youtube.env
       - name: Sync CSV from footprints repository
         run: |
+          pwd
           rm -rf src/csv
           mkdir -p src/csv
           cp -R footprints/rss/ src/csv/
+          ls src/csv/
       - name: Run notifier job
         working-directory: src
         env:
