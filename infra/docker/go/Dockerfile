@@ -1,19 +1,29 @@
-# syntax=docker/dockerfile:1
+FROM golang:1.24-bullseye
 
-FROM golang:1.22-bullseye
+ARG USER_NAME
+ARG GROUP_NAME
+ARG UID
+ARG GID
+ARG WORKDIR
+ARG TZ
 
-WORKDIR /go/src/app
+ENV TZ=${TZ}
 
-# Cache module downloads first
-COPY src/go.mod ./
-RUN go mod download
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      curl && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy application source
-COPY src/ ./
+RUN groupadd -g ${GID} ${GROUP_NAME} && \
+    useradd -lm -s /bin/bash -u ${UID} -g ${GID} ${USER_NAME}
 
-# Build the binary for faster start up in production
-RUN go build -o bin/server ./cmd/server
+USER ${USER_NAME}
 
-EXPOSE 8080
+ENV HOME=/home/${USER_NAME}
+ENV GOPATH=${HOME}/go
+ENV PATH=${PATH}:/usr/local/go/bin:${GOPATH}/bin
 
-CMD ["/go/src/app/bin/server"]
+RUN mkdir -p ${WORKDIR}
+WORKDIR ${WORKDIR}
+
+CMD ["bash"]

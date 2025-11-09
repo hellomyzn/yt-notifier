@@ -1,32 +1,42 @@
-version: '3.9'
-
 services:
-  go:
+  workspace:
+    container_name: ${PROJECT_NAME:-docker-go}
+    hostname: ${PROJECT_NAME:-docker-go}
     build:
       context: .
       dockerfile: ./infra/docker/go/Dockerfile
-    container_name: ${PROJECT_NAME:-docker-go}
-    hostname: ${PROJECT_NAME:-docker-go}
-    working_dir: /go/src/app
+      args:
+        USER_NAME: ${USER_NAME-myzn}
+        GROUP_NAME: ${GROUP_NAME-myzn}
+        UID: ${UID-1000}
+        GID: ${GID-1000}
+        WORKDIR: ${WORKDIR-/home/myzn/workspace}
+        TZ: ${TZ-Asia/Tokyo}
+    working_dir: ${WORKDIR-/home/myzn/workspace}
     tty: true
     restart: unless-stopped
     env_file:
       - .env
+    volumes:
+      - type: bind
+        source: ./src
+        target: ${WORKDIR-/home/myzn/workspace}
+      - type: bind
+        source: ${FOOTPRINTS_DIR}/channels.csv
+        target: ${CSV_DIR-/home/myzn/workspace/src/csv}/channels.csv
+      - type: bind
+        source: ${FOOTPRINTS_DIR}/notified.csv
+        target: ${CSV_DIR-/home/myzn/workspace/src/csv}/notified.csv
     ports:
       - target: 8080
         published: ${APP_PORT:-8080}
         protocol: tcp
         mode: host
-    volumes:
-      - type: bind
-        source: ./src
-        target: /go/src/app
     environment:
       - TZ=${TZ-Asia/Tokyo}
-      - GO_ENV=${GO_ENV-development}
-    depends_on:
-      mysql:
-        condition: service_healthy
+    # depends_on:
+    #   mysql:
+    #     condition: service_healthy
 
   # mysql:
   #   image: mysql:8.0

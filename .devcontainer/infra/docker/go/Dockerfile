@@ -8,7 +8,6 @@ ARG WORKDIR
 ARG TZ
 
 ENV TZ=${TZ}
-ENV HOME=/home/${USER_NAME}
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -24,10 +23,11 @@ RUN groupadd -g ${GID} ${GROUP_NAME} && \
 
 USER ${USER_NAME}
 
+ENV HOME=/home/${USER_NAME}
+ENV GOPATH=${HOME}/go
+ENV PATH=${PATH}:/usr/local/go/bin:${GOPATH}/bin
+
 RUN mkdir -p ${WORKDIR}
 WORKDIR ${WORKDIR}
-
-ENV GOPATH=/home/${USER_NAME}/go
-ENV PATH=${PATH}:${GOPATH}/bin
 
 CMD ["bash"]
