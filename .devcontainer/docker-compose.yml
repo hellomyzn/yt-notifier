@@ -21,6 +21,12 @@ services:
       - type: bind
         source: ..
         target: ${WORKDIR-/home/myzn/workspace}
+      - type: bind
+        source: ${FOOTPRINTS_DIR}/channels.csv
+        target: ${CSV_DIR-/home/myzn/workspace/src/src/csv}/channels.csv
+      - type: bind
+        source: ${FOOTPRINTS_DIR}/notified.csv
+        target: ${CSV_DIR-/home/myzn/workspace/src/src/csv}/notified.csv
     ports:
       - target: 8080
         published: ${APP_PORT:-8080}

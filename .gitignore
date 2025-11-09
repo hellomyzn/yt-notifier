@@ -3,7 +3,6 @@ src/config/webhooks.env
 src/server
 
 # CSV（Git未管理）
-/src/src/csv/
 /src/src/csv/*.csv
 
 
