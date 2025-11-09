@@ -34,7 +34,7 @@ jobs:
           rm -rf src/src/csv
           mkdir -p src/src/csv
           cp -R footprints/rss/ src/src/csv/
-          ls src/csv/
+          ls src/src/csv/
       - name: Run notifier job
         working-directory: src
         env:
