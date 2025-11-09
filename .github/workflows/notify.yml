@@ -23,7 +23,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: src/src/go.mod
+          go-version-file: src/go.mod
       - name: Create .env files
         run: |
           echo "${{ secrets.ENV_WEBHOOKS }}" > src/src/config/webhooks.env
