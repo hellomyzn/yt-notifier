@@ -31,8 +31,7 @@ jobs:
       - name: Sync CSV from footprints repository
         run: |
           pwd
-          rm -rf src/src/csv
-          mkdir -p src/src/csv
+          rm -rf src/src/csv/*
           cp footprints/rss/* src/src/csv/
           ls src/src/csv/
       - name: Run notifier job
@@ -42,22 +41,18 @@ jobs:
         run: go run ./cmd/job
       - name: Sync CSV back to footprints repository
         run: |
-          rm -rf footprints/rss
-          mkdir -p footprints/rss
-          cp -R src/src/csv/* footprints/rss/
-          ls footprints/rss
-          cat footprints/rss/channels.csv
-          cat footprints/rss/notified.csv
-      # - name: Commit CSV updates
-      #   working-directory: footprints
-      #   env:
-      #     GIT_AUTHOR_NAME: ${{ secrets.FOOTPRINTS_AUTHOR_NAME }}
-      #     GIT_AUTHOR_EMAIL: ${{ secrets.FOOTPRINTS_AUTHOR_EMAIL }}
-      #     GIT_COMMITTER_NAME: ${{ secrets.FOOTPRINTS_AUTHOR_NAME }}
-      #     GIT_COMMITTER_EMAIL: ${{ secrets.FOOTPRINTS_AUTHOR_EMAIL }}
-      #   run: |
-      #     if ! git diff --quiet; then
-      #       git add csv/
-      #       git commit -m "Update CSV from yt-notifier"
-      #       git push
-      #     fi
+          rm -rf footprints/rss/*
+          cp src/src/csv/* footprints/rss/
+      - name: Commit CSV updates
+        working-directory: footprints
+        env:
+          GIT_AUTHOR_NAME: ${{ secrets.FOOTPRINTS_AUTHOR_NAME }}
+          GIT_AUTHOR_EMAIL: ${{ secrets.FOOTPRINTS_AUTHOR_EMAIL }}
+          GIT_COMMITTER_NAME: ${{ secrets.FOOTPRINTS_AUTHOR_NAME }}
+          GIT_COMMITTER_EMAIL: ${{ secrets.FOOTPRINTS_AUTHOR_EMAIL }}
+        run: |
+          if ! git diff --quiet; then
+            git add .
+            git commit -m "Update rss from yt-notifier"
+            git push
+          fi
