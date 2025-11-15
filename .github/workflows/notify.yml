@@ -2,7 +2,8 @@ name: Notify subscribers
 
 on:
   schedule:
-    - cron: '0 9,20 * * *'
+    # 09:00, 20:00 JST
+    - cron: '0 0,11 * * *'
       timezone: Asia/Tokyo
   workflow_dispatch:
 
