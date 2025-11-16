@@ -4,7 +4,6 @@ on:
   schedule:
     # 09:00, 20:00 JST
     - cron: '0 0,11 * * *'
-      timezone: Asia/Tokyo
   workflow_dispatch:
 
 concurrency:
