@@ -3,7 +3,7 @@ name: Notify subscribers
 on:
   schedule:
     # 09:00, 20:00 JST
-    - cron: '0 0,11 * * *'
+    - cron: '0 22,11 * * *'
   workflow_dispatch:
 
 concurrency:
