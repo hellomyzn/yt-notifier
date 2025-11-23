@@ -37,6 +37,7 @@ category_to_env:
   productivity_jp:   "DISCORD_WEBHOOK_PRODUCTIVITY_JP"
   programming_en:   "DISCORD_WEBHOOK_PROGRAMMING_EN"
   programming_jp:   "DISCORD_WEBHOOK_PROGRAMMING_JP"
+  real_estate_jp:   "DISCORD_WEBHOOK_REAL_ESTATE_JP"
   science_en: "DISCORD_WEBHOOK_SCIENCE_EN"  
   science_jp: "DISCORD_WEBHOOK_SCIENCE_JP"  
   sns_en: "DISCORD_WEBHOOK_SNS_EN"  
