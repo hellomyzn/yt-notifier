@@ -1,79 +1,317 @@
-# CLAUDE.md
+# CLAUDE.md (プロジェクトメモリ)
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## 概要
+開発を進めるうえで遵守すべき標準ルールを定義します。
 
-## What this project does
+## プロジェクト構造
 
-A scheduled job that polls YouTube RSS feeds (and optionally the YouTube Data API) for 100+ channels every few hours, then dispatches new video notifications as Discord embeds via webhooks. State is tracked in lightweight CSV files stored in a separate "footprints" repository.
+### ドキュメントの分類
 
-## Commands
+#### 1. 永続的ドキュメント（`docs/`）
 
-All Go commands run from the `src/` directory:
+アプリケーション全体の「**何を作るか**」「**どう作るか**」を定義する恒久的なドキュメント。
+アプリケーションの基本設計や方針が変わらない限り更新されません。
+
+- **product-requirements.md** - プロダクト要求定義書
+  - プロダクトビジョンと目的
+  - ターゲットユーザーと課題・ニーズ
+  - 主要な機能一覧
+  - 成功の定義
+  - ビジネス要件
+  - ユーザーストーリー
+  - 受け入れ条件
+  - 機能要件
+  - 非機能要件
+
+- **functional-design.md** - 機能設計書
+  - 機能ごとのアーキテクチャ
+  - システム構成図
+  - データモデル定義（ER図含む）
+  - コンポーネント設計
+  - シーケンス図
+  - ユースケース図
+
+- **architecture.md** - 技術仕様書
+  - テクノロジースタック
+  - 開発ツールと手法
+  - 技術的制約と要件
+  - パフォーマンス要件
+
+- **repository-structure.md** - リポジトリ構造定義書
+  - フォルダ・ファイル構成
+  - ディレクトリの役割
+  - ファイル配置ルール
+
+- **development-guidelines.md** - 開発ガイドライン
+  - コーディング規約
+  - 命名規則
+  - スタイリング規約
+  - テスト規約
+  - Git規約
+
+- **glossary.md** - ユビキタス言語定義
+  - ドメイン用語の定義
+  - ビジネス用語の定義
+  - 英語・日本語対応表
+  - コード上の命名規則
+
+
+#### 2. 作業単位のドキュメント（`.steering/[YYYYMMDD]-[開発タイトル]/`）
+
+特定の開発作業における「**今回何をするか**」を定義する一時的なステアリングファイル。
+作業完了後は参照用として保持されますが、新しい作業では新しいディレクトリを作成します。
+
+- **requirements.md** - 今回の作業の要求内容
+  - 変更・追加する機能の説明
+  - ユーザーストーリー
+  - 受け入れ条件
+  - 制約事項
+
+- **design.md** - 変更内容の設計
+  - 実装アプローチ
+  - 変更するコンポーネント
+  - データ構造の変更
+  - 影響範囲の分析
+
+- **tasklist.md** - タスクリスト
+  - 具体的な実装タスク
+  - タスクの進捗状況
+  - 完了条件
+
+### ステアリングディレクトリの命名規則
+
+```
+.steering/[YYYYMMDD]-[開発タイトル]/
+```
+
+**例：**
+- `.steering/20250103-initial-implementation/`
+- `.steering/20250115-add-tag-feature/`
+- `.steering/20250120-fix-filter-bug/`
+- `.steering/20250201-improve-performance/`
+
+## 開発プロセス
+
+### 初回セットアップ時の手順
+
+#### 1. フォルダ作成
+```bash
+mkdir -p docs
+mkdir -p .steering
+```
+
+#### 2. 永続的ドキュメント作成（`docs/`）
+
+アプリケーション全体の設計を定義します。
+各ドキュメントを作成後、必ず確認・承認を得てから次に進みます。
+
+1. `docs/product-requirements.md` - プロダクト要求定義書
+2. `docs/functional-design.md` - 機能設計書
+3. `docs/architecture.md` - 技術仕様書
+4. `docs/repository-structure.md` - リポジトリ構造定義書
+5. `docs/development-guidelines.md` - 開発ガイドライン
+6. `docs/glossary.md` - ユビキタス言語定義
+
+**重要：** 1ファイルごとに作成後、必ず確認・承認を得てから次のファイル作成を行う
+
+#### 3. 初回実装用のステアリングファイル作成
+
+初回実装用のディレクトリを作成し、実装に必要なドキュメントを配置します。
 
 ```bash
-# Run the job locally
-cd src && go run ./cmd/job
-
-# Run tests
-cd src && go test ./...
-
-# Run a specific test
-cd src && go test ./internal/repository/...
-
-# Build
-cd src && go build ./cmd/job
+mkdir -p .steering/[YYYYMMDD]-initial-implementation
 ```
 
-Docker-based workflow (uses external CSV via volume mount):
+作成するドキュメント：
+1. `.steering/[YYYYMMDD]-initial-implementation/requirements.md` - 初回実装の要求
+2. `.steering/[YYYYMMDD]-initial-implementation/design.md` - 実装設計
+3. `.steering/[YYYYMMDD]-initial-implementation/tasklist.md` - 実装タスク
+
+#### 4. 環境セットアップ
+
+#### 5. 実装開始
+
+`.steering/[YYYYMMDD]-initial-implementation/tasklist.md` に基づいて実装を進めます。
+
+#### 6. 品質チェック
+
+### 機能追加・修正時の手順
+
+#### 1. 影響分析
+
+- 永続的ドキュメント（`docs/`）への影響を確認
+- 変更が基本設計に影響する場合は `docs/` を更新
+
+#### 2. ステアリングディレクトリ作成
+
+新しい作業用のディレクトリを作成します。
 
 ```bash
-make up      # Start container
-make exec    # Shell into workspace container
-make logs    # View logs
-make run     # Full cycle: up → run job → down
-make down    # Stop containers
-make destroy # Destroy containers and volumes
+mkdir -p .steering/[YYYYMMDD]-[開発タイトル]
 ```
 
-## Architecture
-
-Clean layered architecture with no external dependencies (stdlib only):
-
-```
-cmd/job/main.go              → wires up dependencies, calls RunOnce()
-internal/controller/         → orchestrates the job loop
-internal/service/            → business logic (video discovery, notifications)
-internal/repository/         → data access (CSV files, RSS XML, YouTube API)
-internal/notifier/           → Discord webhook HTTP client
-internal/model/dto.go        → ChannelDTO, VideoDTO
-config/                      → YAML + .env file loaders
+**例：**
+```bash
+mkdir -p .steering/20250115-add-tag-feature
 ```
 
-**Data flow**: `job_controller.RunOnce()` reads channels from `csv/channels.csv`, fetches RSS (or YouTube Data API for channels with `fetch_limit >= 15`), deduplicates against `csv/notified.csv`, dispatches Discord embeds, then appends newly notified video IDs back to `notified.csv`.
+#### 3. 作業ドキュメント作成
 
-**Feed strategy**: RSS is the default. The YouTube Data API is used when a channel's `fetch_limit >= 15` and an API key is configured, because RSS caps at 15 items. If the API fails, it falls back to RSS. If RSS is saturated (returns exactly 15 items), the code escalates to the API.
+作業単位のドキュメントを作成します。
+各ドキュメント作成後、必ず確認・承認を得てから次に進みます。
 
-**Notification retry**: Up to 5 retries per webhook post, exponential backoff (base 2s, max 30s), respects Discord `Retry-After` headers on 429s.
+1. `.steering/[YYYYMMDD]-[開発タイトル]/requirements.md` - 要求内容
+2. `.steering/[YYYYMMDD]-[開発タイトル]/design.md` - 設計
+3. `.steering/[YYYYMMDD]-[開発タイトル]/tasklist.md` - タスクリスト
 
-## Configuration
+**重要：** 1ファイルごとに作成後、必ず確認・承認を得てから次のファイル作成を行う
 
-**`src/config/app.yaml`** — main config: category-to-webhook mappings, rate limits (`fetch_sleep_ms`, `post_sleep_ms`), and video filters (`include_premieres`, `include_live`, `include_shorts`).
+#### 4. 永続的ドキュメント更新（必要な場合のみ）
 
-**`src/config/webhooks.env`** — Discord webhook URLs, one per line as `KEY=VALUE`. Not in version control; see `webhooks.env.example`.
+変更が基本設計に影響する場合、該当する `docs/` 内のドキュメントを更新します。
 
-**`src/config/youtube.env`** — YouTube Data API key. Optional; without it, all channels use RSS only.
+#### 5. 実装開始
 
-**CSV schemas**:
-- `csv/channels.csv`: `channel_id,category,name,enabled,fetch_limit`
-- `csv/notified.csv`: `video_id,channel_id,published_at,notified_at`
+`.steering/[YYYYMMDD]-[開発タイトル]/tasklist.md` に基づいて実装を進めます。
 
-## Deployment
+#### 6. 品質チェック
 
-The job runs on GitHub Actions (`.github/workflows/notify.yml`) twice daily (8:00 AM and 8:00 PM JST). The workflow:
-1. Checks out this repo and a separate "footprints" repo (holds the CSVs)
-2. Writes secrets to `src/config/webhooks.env` and `src/config/youtube.env`
-3. Syncs CSVs from footprints into `src/src/csv/`
-4. Runs `cd src && go run ./cmd/job`
-5. Commits and pushes updated CSVs back to footprints
+## ドキュメント管理の原則
 
-Required GitHub secrets: `FOOTPRINTS_TOKEN`, `ENV_WEBHOOKS`, `ENV_YOUTUBE`, `FOOTPRINTS_AUTHOR_NAME`, `FOOTPRINTS_AUTHOR_EMAIL`.
+### 永続的ドキュメント（`docs/`）
+- アプリケーションの基本設計を記述
+- 頻繁に更新されない
+- 大きな設計変更時のみ更新
+- プロジェクト全体の「北極星」として機能
+
+### 作業単位のドキュメント（`.steering/`）
+- 特定の作業・変更に特化
+- 作業ごとに新しいディレクトリを作成
+- 作業完了後は履歴として保持
+- 変更の意図と経緯を記録
+
+## 図表・ダイアグラムの記載ルール
+
+### 記載場所
+設計図やダイアグラムは、関連する永続的ドキュメント内に直接記載します。
+独立したdiagramsフォルダは作成せず、手間を最小限に抑えます。
+
+**配置例：**
+- ER図、データモデル図 → `functional-design.md` 内に記載
+- シーケンス図 → `functional-design.md` 内に記載（Mermaid記法の `sequenceDiagram` を使用）
+- ユースケース図 → `functional-design.md` または `product-requirements.md` 内に記載
+- システム構成図 → `functional-design.md` または `architecture.md` 内に記載
+
+### 記述形式
+1. **Mermaid記法（推奨）**
+   - Markdownに直接埋め込める
+   - バージョン管理が容易
+   - ツール不要で編集可能
+
+```mermaid
+graph TD
+    A[ユーザー] --> B[タスク作成]
+    B --> C[タスク一覧]
+    C --> D[タスク編集]
+    C --> E[タスク削除]
+```
+
+2. **ASCII アート**
+   - シンプルな図表に使用
+   - テキストエディタで編集可能
+
+```
+┌─────────────┐
+│   Header    │
+└─────────────┘
+       │
+       ↓
+┌─────────────┐
+│  Task List  │
+└─────────────┘
+```
+
+3. **画像ファイル（必要な場合のみ）**
+   - 複雑なワイヤフレームやモックアップ
+   - `docs/images/` フォルダに配置
+   - PNG または SVG 形式を推奨
+
+### 図表の更新
+- 設計変更時は対応する図表も同時に更新
+- 図表とコードの乖離を防ぐ
+
+## 開発スタイル
+
+### TDD（テスト駆動開発）
+
+**実装前にテストを書く。** Red → Green → Refactor のサイクルで進める。
+
+1. **Red**: 失敗するテストを書く
+2. **Green**: テストが通る最小限の実装をする
+3. **Refactor**: テストを通したまま整理する
+
+テストファイルは実装ファイルと同じパッケージ・同じディレクトリに配置する（`xxx_test.go`）。
+
+```
+internal/service/
+├── feed_service.go
+└── feed_service_test.go   ← 実装と同じ場所に置く
+```
+
+インターフェースが定義されているため、依存先はモックに差し替えてテストする。
+
+```go
+// テスト用モックの例
+type mockNotifiedRepo struct {
+    seen map[string]bool
+}
+func (m *mockNotifiedRepo) Has(id string) (bool, error) { return m.seen[id], nil }
+func (m *mockNotifiedRepo) Append(...) error             { return nil }
+```
+
+テストはテーブル駆動で書く（Go のイディオム）。
+
+```go
+func TestListNewVideos(t *testing.T) {
+    tests := []struct {
+        name    string
+        seen    map[string]bool
+        want    int
+    }{
+        {"全て未通知", map[string]bool{}, 2},
+        {"全て通知済み", map[string]bool{"v1": true, "v2": true}, 0},
+    }
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) { ... })
+    }
+}
+```
+
+### カバレッジ
+
+対象は `internal/` のみ（`cmd/job/` は DI 配線のみのため除外）。
+
+```bash
+make test           # テスト実行
+make coverage       # カバレッジ率を表示
+make coverage-html  # src/test/coverage/coverage.html を生成
+```
+
+目標値（`internal/` 全体）:
+
+| フェーズ | 目標 |
+|---|---|
+| テスト導入初期 | 計測・レポートのみ（閾値なし） |
+| テストが揃ってきたら | 60% 以上を維持 |
+| 安定期 | 80% 以上を目指す |
+
+`cmd/job/` はカバレッジ対象外のため、グローバルの % に惑わされない。
+
+## 注意事項
+
+- ドキュメントの作成・更新は段階的に行い、各段階で承認を得る
+- `.steering/` のディレクトリ名は日付と開発タイトルで明確に識別できるようにする
+- 永続的ドキュメントと作業単位のドキュメントを混同しない
+- コード変更後は必ずリント・型チェックと `go test ./...` を実施する
+- セキュリティを考慮したコーディング（APIキー・webhook URLのハードコード禁止、外部APIレスポンスの適切なバリデーション、依存ライブラリの定期的な脆弱性チェック）
+- 図表は必要最小限に留め、メンテナンスコストを抑える

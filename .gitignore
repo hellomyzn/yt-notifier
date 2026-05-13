@@ -13,3 +13,7 @@ src/server
 
 # Go
 bin/
+
+# テストカバレッジ
+src/test/coverage/*.out
+src/test/coverage/*.html

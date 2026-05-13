@@ -51,7 +51,10 @@ func main() {
 
 	csvDir := filepath.Join(root, "src", "csv")
 	chRepo := &repository.CSVChannelRepository{Path: filepath.Join(csvDir, "channels.csv")}
-	notiRepo := &repository.CSVNotifiedRepository{Path: filepath.Join(csvDir, "notified.csv")}
+	notiRepo, err := repository.NewCachedNotifiedRepository(filepath.Join(csvDir, "notified.csv"))
+	if err != nil {
+		log.Fatalf("failed to load notified repository: %v", err)
+	}
 	feedRepo := &repository.RSSFeedRepository{}
 
 	ytKey := ""

@@ -31,3 +31,25 @@ run:
 	@sleep 2
 	docker-compose ${DOCKER_COMPOSE_FILE_PATH} ${ENV_PATH} exec ${USER_FLAG} workspace bash -c "${CMD}"
 	@make down
+
+# テスト・カバレッジ（cmd/job/ は DI 配線のみのため除外）
+COVERAGE_DIR=src/test/coverage
+COVERAGE_OUT=$(COVERAGE_DIR)/coverage.out
+COVERAGE_HTML=$(COVERAGE_DIR)/coverage.html
+TEST_PKGS=./internal/...
+
+test:
+	cd src && go test $(TEST_PKGS)
+
+test-v:
+	cd src && go test -v $(TEST_PKGS)
+
+coverage:
+	mkdir -p $(COVERAGE_DIR)
+	cd src && go test -coverprofile=../$(COVERAGE_OUT) -covermode=atomic $(TEST_PKGS)
+	cd src && go tool cover -func=../$(COVERAGE_OUT)
+
+coverage-html:
+	@make coverage
+	cd src && go tool cover -html=../$(COVERAGE_OUT) -o ../$(COVERAGE_HTML)
+	@echo "Report: $(COVERAGE_HTML)"

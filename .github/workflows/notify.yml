@@ -25,6 +25,8 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: src/go.mod
+          cache: true
+          cache-dependency-path: src/go.sum
       - name: Create .env files
         run: |
           echo "${{ secrets.ENV_WEBHOOKS }}" > src/config/webhooks.env
@@ -35,11 +37,13 @@ jobs:
           rm -rf src/src/csv/*
           cp footprints/rss/* src/src/csv/
           ls src/src/csv/
-      - name: Run notifier job
+      - name: Build notifier
         working-directory: src
+        run: go build -o /tmp/yt-notifier ./cmd/job
+      - name: Run notifier job
         env:
           TZ: Asia/Tokyo
-        run: go run ./cmd/job
+        run: /tmp/yt-notifier
       - name: Sync CSV back to footprints repository
         run: |
           rm -rf footprints/rss/*
