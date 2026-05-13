@@ -91,21 +91,22 @@ func main() {
 		time.Duration(cfg.RateLimit.PostSleepMS)*time.Millisecond,
 	)
 
+	summaryWebhook := ""
+	if cfg.SummaryWebhookEnv != "" {
+		summaryWebhook = webhookSecrets[cfg.SummaryWebhookEnv]
+	}
+
 	job := controller.NewJobController(
 		chRepo,
 		feedSvc,
 		notifySvc,
 		time.Duration(cfg.RateLimit.FetchSleepMS)*time.Millisecond,
+		ytRepo,
+		summaryWebhook,
 	)
 
 	if err := job.RunOnce(); err != nil {
 		log.Fatal(err)
-	}
-
-	if ytRepo != nil {
-		if metrics := ytRepo.Metrics(); metrics.Requests > 0 || metrics.QuotaUnits > 0 {
-			log.Printf("youtube api usage: requests=%d quota_units=%d", metrics.Requests, metrics.QuotaUnits)
-		}
 	}
 }
 

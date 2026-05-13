@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"sync"
@@ -62,6 +63,7 @@ func (s *notifyService) Notify(category string, v model.VideoDTO) error {
 		ThumbURL: thumb,
 	}
 
+	log.Printf("notifying: [%s] %s - %s", category, v.ChannelName, v.Title)
 	retries, err := dispatcher.send(content)
 	if err != nil {
 		s.recordFailure()

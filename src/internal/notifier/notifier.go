@@ -31,7 +31,9 @@ func (n *DiscordNotifier) Send(c NotificationContent) error {
 	embed := map[string]any{
 		"title":       c.Title,
 		"description": c.Message,
-		"url":         c.URL,
+	}
+	if c.URL != "" {
+		embed["url"] = c.URL
 	}
 	if c.ThumbURL != "" {
 		embed["image"] = map[string]string{"url": c.ThumbURL}

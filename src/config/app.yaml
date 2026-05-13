@@ -1,5 +1,6 @@
 default_output: "discord"  # 今回はDiscordのみ
 webhook_file: "config/webhooks.env"
+summary_webhook_env: "DISCORD_WEBHOOK_SUMMARY"
 category_to_output:
   travel: "discord"
   news:   "discord"

@@ -13,6 +13,7 @@ type AppConfig struct {
 	CategoryToOutput map[string]string
 	CategoryToEnv    map[string]string
 	WebhookFile      string
+	SummaryWebhookEnv string
 	YouTube          struct {
 		APIKeyFile string
 		APIKeyName string
@@ -104,6 +105,8 @@ func applyTopLevel(cfg *AppConfig, key, value string) error {
 		cfg.Timezone = value
 	case "webhook_file":
 		cfg.WebhookFile = value
+	case "summary_webhook_env":
+		cfg.SummaryWebhookEnv = value
 	default:
 		return nil
 	}
