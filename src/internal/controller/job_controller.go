@@ -156,7 +156,8 @@ func (c *jobController) printSummary(stats []channelStat, feedStats service.Feed
 
 	for _, s := range stats {
 		if s.fetchErr {
-			log.Printf("  [%s] %s: fetch error", s.ch.Category, s.ch.Name)
+			log.Printf("  [%s] %s: fetch error - 削除または非公開になった可能性があります (https://www.youtube.com/channel/%s)",
+				s.ch.Category, s.ch.Name, s.ch.ChannelID)
 		} else if s.newCount > 0 {
 			log.Printf("  [%s] %s: new=%d  notified=%d  failed=%d", s.ch.Category, s.ch.Name, s.newCount, s.notified, s.failed)
 		}
@@ -199,7 +200,8 @@ func (c *jobController) sendDiscordSummary(stats []channelStat, feedStats servic
 			}
 			var line string
 			if s.fetchErr {
-				line = fmt.Sprintf("• [%s] %s: ⚠ フェッチエラー\n", s.ch.Category, s.ch.Name)
+				line = fmt.Sprintf("• [%s] [%s](https://www.youtube.com/channel/%s): ⚠ 削除または非公開になった可能性があります\n",
+					s.ch.Category, s.ch.Name, s.ch.ChannelID)
 			} else if s.failed > 0 {
 				line = fmt.Sprintf("• [%s] %s: %d件通知 (%d件失敗)\n", s.ch.Category, s.ch.Name, s.notified, s.failed)
 			} else {

@@ -39,17 +39,32 @@ COVERAGE_HTML=$(COVERAGE_DIR)/coverage.html
 TEST_PKGS=./internal/...
 
 test:
-	cd src && go test $(TEST_PKGS)
+	@make up
+	@echo "Waiting for container to be ready..."
+	@sleep 2
+	docker compose ${DOCKER_COMPOSE_FILE_PATH} ${ENV_PATH} exec ${USER_FLAG} workspace bash -c "go test $(TEST_PKGS)"
+	@make down
 
 test-v:
-	cd src && go test -v $(TEST_PKGS)
+	@make up
+	@echo "Waiting for container to be ready..."
+	@sleep 2
+	docker compose ${DOCKER_COMPOSE_FILE_PATH} ${ENV_PATH} exec ${USER_FLAG} workspace bash -c "go test -v $(TEST_PKGS)"
+	@make down
 
 coverage:
-	mkdir -p $(COVERAGE_DIR)
-	cd src && go test -coverprofile=../$(COVERAGE_OUT) -covermode=atomic $(TEST_PKGS)
-	cd src && go tool cover -func=../$(COVERAGE_OUT)
+	@make up
+	@echo "Waiting for container to be ready..."
+	@sleep 2
+	docker compose ${DOCKER_COMPOSE_FILE_PATH} ${ENV_PATH} exec ${USER_FLAG} workspace bash -c \
+		"mkdir -p $(COVERAGE_DIR) && go test -coverprofile=$(COVERAGE_OUT) -covermode=atomic $(TEST_PKGS) && go tool cover -func=$(COVERAGE_OUT)"
+	@make down
 
 coverage-html:
-	@make coverage
-	cd src && go tool cover -html=../$(COVERAGE_OUT) -o ../$(COVERAGE_HTML)
+	@make up
+	@echo "Waiting for container to be ready..."
+	@sleep 2
+	docker compose ${DOCKER_COMPOSE_FILE_PATH} ${ENV_PATH} exec ${USER_FLAG} workspace bash -c \
+		"mkdir -p $(COVERAGE_DIR) && go test -coverprofile=$(COVERAGE_OUT) -covermode=atomic $(TEST_PKGS) && go tool cover -func=$(COVERAGE_OUT) && go tool cover -html=$(COVERAGE_OUT) -o $(COVERAGE_HTML)"
+	@make down
 	@echo "Report: $(COVERAGE_HTML)"

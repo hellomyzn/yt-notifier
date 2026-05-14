@@ -41,6 +41,7 @@ jobs:
         working-directory: src
         run: go build -o /tmp/yt-notifier ./cmd/job
       - name: Run notifier job
+        working-directory: src
         env:
           TZ: Asia/Tokyo
         run: /tmp/yt-notifier

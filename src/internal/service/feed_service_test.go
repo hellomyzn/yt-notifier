@@ -185,7 +185,7 @@ func TestFeedService_ListNewVideos_RSSError(t *testing.T) {
 }
 
 func TestFeedService_ListNewVideos_SaturationTriggersAPIEscalation(t *testing.T) {
-	// RSS が 15 件返す（飽和） → API に昇格
+	// RSS が 15 件返す（飽和）かつ全件未通知 → API に昇格
 	rssVideos := makeVideos(
 		"v1", "v2", "v3", "v4", "v5",
 		"v6", "v7", "v8", "v9", "v10",
@@ -201,11 +201,36 @@ func TestFeedService_ListNewVideos_SaturationTriggersAPIEscalation(t *testing.T)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	// API に昇格されたので API の結果を使う
+	// 全件未通知 → API に昇格
 	if yt.calls != 1 {
-		t.Errorf("YouTube API calls = %d; want 1 (飽和昇格)", yt.calls)
+		t.Errorf("YouTube API calls = %d; want 1 (全件未通知→飽和昇格)", yt.calls)
 	}
 	_ = got
+}
+
+func TestFeedService_ListNewVideos_SaturationSkipsAPIWhenContinuity(t *testing.T) {
+	// RSS が 15 件返す（飽和）が、うち1件は通知済み → 連続性あり → API 不要
+	rssVideos := makeVideos(
+		"v1", "v2", "v3", "v4", "v5",
+		"v6", "v7", "v8", "v9", "v10",
+		"v11", "v12", "v13", "v14", "v15",
+	)
+	rss := &mockFeedRepo{videos: rssVideos}
+	yt := &mockYTRepo{}
+	notified := &mockNotifiedRepo{seen: map[string]bool{"v15": true}} // v15 は通知済み
+
+	svc := NewFeedService(rss, yt, notified, false, false, true)
+	got, err := svc.ListNewVideos(makeCh(10))
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if yt.calls != 0 {
+		t.Errorf("YouTube API calls = %d; want 0 (連続性あり→スキップ)", yt.calls)
+	}
+	if len(got) != 14 {
+		t.Errorf("len(result) = %d; want 14 (v15 除く)", len(got))
+	}
 }
 
 // ---- ytRateLimitErr: repository.ErrYouTubeRateLimited をラップ ----

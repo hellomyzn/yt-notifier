@@ -59,9 +59,9 @@ func (s *feedService) ListNewVideos(ch model.ChannelDTO) ([]model.VideoDTO, erro
 	}
 	if err != nil && useYouTube {
 		if errors.Is(err, repository.ErrYouTubeRateLimited) {
-			log.Printf("youtube api quota exceeded for channel=%s, falling back to rss", ch.ChannelID)
+			log.Printf("youtube api quota exceeded for channel=%s, falling back to rss", ch.Name)
 		} else {
-			log.Printf("youtube api fetch failed for channel=%s: %v; falling back to rss", ch.ChannelID, err)
+			log.Printf("youtube api fetch failed for channel=%s: %v; falling back to rss", ch.Name, err)
 		}
 		s.recordAPIFallback()
 		s.recordRSSFetch()
@@ -72,33 +72,49 @@ func (s *feedService) ListNewVideos(ch model.ChannelDTO) ([]model.VideoDTO, erro
 		return nil, err
 	}
 
-	// If the RSS feed is saturated (15 items) we might miss uploads, so escalate to API when available.
-	if !useYouTube && s.ytRepo != nil && len(videos) >= rssMaxWindow {
-		log.Printf("rss feed saturated for channel=%s; attempting youtube api", ch.ChannelID)
+	// dedup を先に実施して連続性を判定する。
+	// RSS が 15 件（上限）かつ全件未通知の場合のみ API へエスカレーション。
+	// 通知済みが1件以上あれば前回実行との連続性があり、15件ウィンドウ内に全新着が収まっている。
+	out, err := s.filterNew(videos)
+	if err != nil {
+		return nil, err
+	}
+
+	if !useYouTube && s.ytRepo != nil && len(videos) >= rssMaxWindow && len(out) == len(videos) {
+		log.Printf("rss feed saturated for channel=%s; attempting youtube api", ch.Name)
 		s.recordSaturationTrigger()
 		apiVideos, apiErr := s.ytRepo.FetchUploads(ch.ChannelID, ch.FetchLimit)
 		if apiErr == nil {
-			videos = apiVideos
+			out, err = s.filterNew(apiVideos)
+			if err != nil {
+				return nil, err
+			}
 			s.recordAPIFetch()
 		} else {
-			log.Printf("failed to load youtube api feed after rss saturation for channel=%s: %v", ch.ChannelID, apiErr)
+			log.Printf("failed to load youtube api feed after rss saturation for channel=%s: %v", ch.Name, apiErr)
 			if errors.Is(apiErr, repository.ErrYouTubeRateLimited) {
 				s.recordAPIFallback()
 			}
 		}
 	}
 
+	if len(out) > 0 {
+		log.Printf("fetched: [%s] %s - 新着%d件", ch.Category, ch.Name, len(out))
+	}
+	return out, nil
+}
+
+func (s *feedService) filterNew(videos []model.VideoDTO) ([]model.VideoDTO, error) {
 	var out []model.VideoDTO
 	for _, v := range videos {
 		seen, err := s.notifiedRepo.Has(v.VideoID)
 		if err != nil {
 			return nil, err
 		}
-		if seen {
-			continue
+		if !seen {
+			// TODO: includeLive/includePremieres/includeShorts に応じたフィルタを追加
+			out = append(out, v)
 		}
-		// TODO: includeLive/includePremieres/includeShorts に応じたフィルタを追加
-		out = append(out, v)
 	}
 	return out, nil
 }
