@@ -31,7 +31,11 @@ category_to_env:
   music_en:   "DISCORD_WEBHOOK_MUSIC_EN"
   music_jp:   "DISCORD_WEBHOOK_MUSIC_JP"
   news_en:   "DISCORD_WEBHOOK_NEWS_EN"
-  news_jp:   "DISCORD_WEBHOOK_NEWS_JP"
+  news_jp_1: "DISCORD_WEBHOOK_NEWS_JP_1"
+  news_jp_2: "DISCORD_WEBHOOK_NEWS_JP_2"
+  news_jp_3: "DISCORD_WEBHOOK_NEWS_JP_3"
+  news_jp_4: "DISCORD_WEBHOOK_NEWS_JP_4"
+  news_jp_5: "DISCORD_WEBHOOK_NEWS_JP_5"
   politics_en:   "DISCORD_WEBHOOK_POLITICS_EN"
   politics_jp:   "DISCORD_WEBHOOK_POLITICS_JP"
   productivity_en:   "DISCORD_WEBHOOK_PRODUCTIVITY_EN"
@@ -56,7 +60,7 @@ youtube:
   api_key_name: "YOUTUBE_API_KEY"
 rate_limit:
   fetch_sleep_ms: 1200
-  post_sleep_ms: 900
+  post_sleep_ms: 2000
 filters:
   include_premieres: false
   include_live: false
