@@ -19,18 +19,18 @@ Discord サーバーで以下の5チャンネル分の Webhook を発行する�
 タスク1で発行した URL を `config/webhooks.env` に追記する。
 完了後、既存の `DISCORD_WEBHOOK_NEWS_JP` は削除する。
 
-### [ ] 3. `channels.csv` のカテゴリを更新する
+### [x] 3. `channels.csv` のカテゴリを更新する
 
 `/Users/myzn/projects/footprints/rss/channels.csv` の対象チャンネルの
 カテゴリ列を `news_jp` → `news_jp_1`〜`news_jp_5` に変更する。
 
-### [ ] 4. `app.yaml` に新カテゴリの Webhook マッピングを追加する
+### [x] 4. `app.yaml` に新カテゴリの Webhook マッピングを追加する
 
 `src/config/app.yaml` の `category_to_env` セクションに
 `news_jp_1`〜`news_jp_5` のエントリを追加し、
 既存の `news_jp` エントリを削除する。
 
-### [ ] 5. `app.yaml` の `post_sleep_ms` を変更する
+### [x] 5. `app.yaml` の `post_sleep_ms` を変更する
 
 `rate_limit.post_sleep_ms` を `900` → `2000` に変更する。
 
